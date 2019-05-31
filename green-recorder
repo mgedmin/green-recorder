@@ -14,13 +14,20 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Green Recorder.  If not, see <http://www.gnu.org/licenses/>.
+
+import os
+
+# Force GDK backend to be X11 because Wayland applications are not allowed to
+# know their window positions, which we need for selecting an area to record!
+os.environ['GDK_BACKEND'] = 'x11'
+
 import gi
 gi.require_version('AppIndicator3', '0.1')
 gi.require_version('Gtk','3.0')
 
 from gi.repository import Gtk, Gdk, GLib, AppIndicator3 as appindicator
 from pydbus import SessionBus
-import subprocess, signal, threading, datetime, gettext, locale, os, sys
+import subprocess, signal, threading, datetime, gettext, locale, sys
 
 try:
     # Python 3
@@ -468,13 +475,6 @@ if "wayland" in DisplayServer:
   
   formatchooser.append("webm", "WebM (The Open WebM Format)")
   formatchooser.set_active(0)
-
-  try:
-    s = os.getenv('GDK_BACKEND', '')
-    if "x11" not in s:
-      sendnotification(_("You didn't run the program using the application icon (desktop file). This will cause the program not to work. Run it using the icon from the menus only. (Need to export GDK_BACKEND=x11 first)"), 6)
-  except Exception as e:
-    print(e)
 
 class Handler:
     def recordclicked(self, GtkButton):
